@@ -8,6 +8,7 @@
 
 import logging
 from .llm import LLMInterface, LLMConfig, ModelType
+from .schema import Message
 from .config import config
 
 # 配置日志
@@ -40,10 +41,17 @@ def main():
     # 用户提问
     prompt = "解释一下什么是大语言模型？"
 
-    history = [{
-        "role": "system",
-        "content": "你是一个AI助手，请为用户回答问题。"
-    }]
+    system_message = Message.system_message(
+        content="你是一个专业的AI助手，请用回答用户的问题, 自行选择语言."
+    )
+
+    user_message = Message.user_message(
+        content=prompt,
+    )
+
+
+    messages = [system_message, user_message]
+    messages = [msg.to_dict() for msg in messages]
     
     # 生成回答
     print(f"\n问题: {prompt}")
@@ -52,7 +60,8 @@ def main():
     try:
         # 调用LLM生成回答
         response = llm.generate(
-            prompt=prompt
+            prompt=None,
+            context=messages,
         )
         
         # 输出生成结果

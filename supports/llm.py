@@ -484,6 +484,8 @@ class LLMInterface:
         Returns:
             消息列表
         """
+        return context
+    
         if context and "messages" in context:
             messages = context["messages"]
             # 确保最后一条消息是当前提示
