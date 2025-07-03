@@ -472,7 +472,10 @@ class LLMInterface:
         context: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, str]]:
         """
-        准备消息列表
+        准备消息列表: 
+        1. 如果context中已经包含messages，直接使用；
+        如果最后一条已经是用户消息，则更新内容，否则添加新的用户消息.
+        2. 创建新消息列表
         
         Args:
             prompt: 提示文本
@@ -481,48 +484,43 @@ class LLMInterface:
         Returns:
             消息列表
         """
-        return context
-        # 如果context中已经包含messages，直接使用
-        # if context and "messages" in context:
-        #     messages = context["messages"]
-            
-        #     # 确保最后一条消息是当前提示
-        #     if messages and isinstance(messages[-1], dict) and messages[-1].get("role") == "user":
-        #         # 如果最后一条已经是用户消息，更新内容
-        #         messages[-1]["content"] = prompt
-        #     else:
-        #         # 否则添加新的用户消息
-        #         messages.append({"role": "user", "content": prompt})
+        if context and "messages" in context:
+            messages = context["messages"]
+            # 确保最后一条消息是当前提示
+            if messages and isinstance(messages[-1], dict) and messages[-1].get("role") == "user":
+                messages[-1]["content"] = prompt
+            else:
+                messages.append({"role": "user", "content": prompt})
                 
-        #     return messages
+            return messages
         
-        # # 否则创建新的消息列表
-        # system_message = (context or {}).get("system_message", "你是一个有用的AI助手。")
+        # 否则创建新的消息列表
+        system_message = (context or {}).get("system_message", "你是一个有用的AI助手。")
         
-        # messages = [
-        #     {"role": "system", "content": system_message},
-        #     {"role": "user", "content": prompt}
-        # ]
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": prompt}
+        ]
         
-        # # 如果上下文中有历史消息，添加到messages中
-        # if context and "history" in context:
-        #     history = context["history"]
+        # 如果上下文中有历史消息，添加到messages中
+        if context and "history" in context:
+            history = context["history"]
             
-        #     # 构建完整的消息列表
-        #     full_messages = [{"role": "system", "content": system_message}]
+            # 构建完整的消息列表
+            full_messages = [{"role": "system", "content": system_message}]
             
-        #     for entry in history:
-        #         if "user" in entry:
-        #             full_messages.append({"role": "user", "content": entry["user"]})
-        #         if "assistant" in entry:
-        #             full_messages.append({"role": "assistant", "content": entry["assistant"]})
+            for entry in history:
+                if "user" in entry:
+                    full_messages.append({"role": "user", "content": entry["user"]})
+                if "assistant" in entry:
+                    full_messages.append({"role": "assistant", "content": entry["assistant"]})
             
-        #     # 添加当前提示
-        #     full_messages.append({"role": "user", "content": prompt})
+            # 添加当前提示
+            full_messages.append({"role": "user", "content": prompt})
             
-        #     messages = full_messages
+            messages = full_messages
         
-        # return messages
+        return messages
     
     def _generate_openai(
         self, 

@@ -39,6 +39,11 @@ def main():
     
     # 用户提问
     prompt = "解释一下什么是大语言模型？"
+
+    history = [{
+        "role": "system",
+        "content": "你是一个AI助手，请为用户回答问题。"
+    }]
     
     # 生成回答
     print(f"\n问题: {prompt}")
@@ -46,7 +51,9 @@ def main():
     
     try:
         # 调用LLM生成回答
-        response = llm.generate(prompt)
+        response = llm.generate(
+            prompt=prompt
+        )
         
         # 输出生成结果
         print("\n回答:")
